@@ -5,9 +5,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import ru.job4j.config.*;
 import ru.job4j.content.Content;
 import ru.job4j.services.TelegramBotService;
 
+@SpringBootApplication
 public class Main {
     public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
@@ -16,8 +18,11 @@ public class Main {
     @Bean
     public CommandLineRunner initTelegramApi(ApplicationContext ctx) {
         return args -> {
-            var bot = ctx.getBean(TelegramBotService.class);
-            bot.receive(new Content());
+//            var bot = ctx.getBean(TelegramBotService.class);
+//            bot.receive(new Content());
+
+            AppConfig appConfig = ctx.getBean(AppConfig.class);
+            appConfig.printConfig();
         };
     }
 }
