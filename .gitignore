@@ -15,8 +15,10 @@ hs_err_pid*
 *.iml
 
 target
-.config.telegram/
+
 
 out
 *.log
 logs
+telegram
+/config/telegram/application.properties
