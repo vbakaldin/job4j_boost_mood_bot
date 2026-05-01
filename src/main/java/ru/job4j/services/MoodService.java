@@ -1,37 +1,64 @@
 package ru.job4j.services;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
+import ru.job4j.content.*;
+import ru.job4j.model.*;
+import ru.job4j.recommendation.RecommendationEngine;
+import ru.job4j.repository.*;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
 
 @Service
-public class MoodService implements ApplicationContextAware {
+public class MoodService {
+    private final MoodLogRepository moodLogRepository;
+    private final RecommendationEngine recommendationEngine;
+    private final UserRepository userRepository;
+    private final AchievementRepository achievementRepository;
+    private final DateTimeFormatter formatter = DateTimeFormatter
+            .ofPattern("dd-MM-yyyy HH:mm")
+            .withZone(ZoneId.systemDefault());
 
-    private ApplicationContext applicationContext;
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-        System.out.println("ApplicationContext set in ApplicationContextAwareExample");
+    public MoodService(MoodLogRepository moodLogRepository,
+                       RecommendationEngine recommendationEngine,
+                       UserRepository userRepository,
+                       AchievementRepository achievementRepository) {
+        this.moodLogRepository = moodLogRepository;
+        this.recommendationEngine = recommendationEngine;
+        this.userRepository = userRepository;
+        this.achievementRepository = achievementRepository;
     }
 
-    public void displayAllBeanNames() {
-        String[] beanNames = applicationContext.getBeanDefinitionNames();
-        System.out.println("Beans in ApplicationContext:");
-        for (String beanName : beanNames) {
-            System.out.println(beanName);
+    public Content chooseMood(User user, Long moodId) {
+        return recommendationEngine.recommendFor(user.getChatId(), moodId);
+    }
+
+    public Optional<Content> weekMoodLogCommand(long chatId, Long clientId) {
+        var content = new Content(chatId);
+        return Optional.of(content);
+    }
+
+    public Optional<Content> monthMoodLogCommand(long chatId, Long clientId) {
+        var content = new Content(chatId);
+        return Optional.of(content);
+    }
+
+    private String formatMoodLogs(List<MoodLog> logs, String title) {
+        if (logs.isEmpty()) {
+            return title + ":\nNo mood logs found.";
         }
+        var sb = new StringBuilder(title + ":\n");
+        logs.forEach(log -> {
+            String formattedDate = formatter.format(Instant.ofEpochSecond(log.getCreatedAt()));
+            sb.append(formattedDate).append(": ").append(log.getMood().getText()).append("\n");
+        });
+        return sb.toString();
     }
 
-    @PostConstruct
-    public void init() {
-        System.out.println("Bean is going through @PostConstruct init.");
-    }
-
-    @PreDestroy
-    public void destroy() {
-        System.out.println("Bean will be destroyed via @PreDestroy.");
+    public Optional<Content> awards(long chatId, Long clientId) {
+        var content = new Content(chatId);
+        return Optional.of(content);
     }
 }
