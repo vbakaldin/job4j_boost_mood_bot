@@ -47,7 +47,9 @@ public class MoodContent {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         MoodContent that = (MoodContent) o;
         return Objects.equals(id, that.id) && Objects.equals(mood, that.mood) && Objects.equals(text, that.text);
     }
