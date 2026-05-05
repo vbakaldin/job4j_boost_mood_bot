@@ -26,6 +26,14 @@ public class Main {
     }
 
     @Bean
+    CommandLineRunner registerTelegramBot(TgRemoteService tgRemoteService) {
+        return args -> {
+            TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+            telegramBotsApi.registerBot(tgRemoteService);
+        };
+    }
+
+    @Bean
     CommandLineRunner loadDatabase(MoodRepository moodRepository,
                                    MoodContentRepository moodContentRepository,
                                    AwardRepository awardRepository) {

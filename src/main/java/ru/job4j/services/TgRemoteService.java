@@ -32,13 +32,16 @@ public class TgRemoteService extends TelegramLongPollingBot {
     private final String botName;
     private final String botToken;
     private final UserRepository userRepository;
+    private final TgUI tgUI;
 
     public TgRemoteService(@Value("${telegram.bot.name}") String botName,
                            @Value("${telegram.bot.token}") String botToken,
-                           UserRepository userRepository) {
+                           UserRepository userRepository,
+                           TgUI tgUI) {
         this.botName = botName;
         this.botToken = botToken;
         this.userRepository = userRepository;
+        this.tgUI = tgUI;
     }
 
     @Override
@@ -70,19 +73,7 @@ public class TgRemoteService extends TelegramLongPollingBot {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText("Как настроение сегодня?");
-
-        var inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-
-        keyboard.add(List.of(createBtn("Потерял носок \uD83D\uDE22", "lost_sock")));
-        keyboard.add(List.of(createBtn("Как огурец на полке \uD83D\uDE10", "cucumber")));
-        keyboard.add(List.of(createBtn("Готов к танцам \uD83D\uDE04", "dance_ready")));
-        keyboard.add(List.of(createBtn("Где мой кофе?! \uD83D\uDE23", "need_coffee")));
-        keyboard.add(List.of(createBtn("Слипаются глаза \uD83D\uDE29", "sleepy")));
-
-        inlineKeyboardMarkup.setKeyboard(keyboard);
-        message.setReplyMarkup(inlineKeyboardMarkup);
-
+        message.setReplyMarkup(tgUI.buildButtons());
         return message;
     }
 
@@ -115,10 +106,13 @@ public class TgRemoteService extends TelegramLongPollingBot {
             var message = update.getMessage();
             if ("/start".equals(message.getText())) {
                 long chatId = message.getChatId();
-                var user = new User();
-                user.setClientId(message.getFrom().getId());
-                user.setChatId(chatId);
-                userRepository.save(user);
+                long clientId = message.getFrom().getId();
+                if (userRepository.findByClientId(clientId) == null) {
+                    var user = new User();
+                    user.setClientId(clientId);
+                    user.setChatId(chatId);
+                    userRepository.save(user);
+                }
                 send(sendButtons(chatId));  // Метод для отправки кнопок пользователю
             }
         }
