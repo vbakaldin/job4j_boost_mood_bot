@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.job4j.content.Content;
 import ru.job4j.model.User;
 import ru.job4j.repository.UserRepository;
 
@@ -31,17 +32,14 @@ public class TgRemoteService extends TelegramLongPollingBot {
 
     private final String botName;
     private final String botToken;
-    private final UserRepository userRepository;
-    private final TgUI tgUI;
+    private final BotCommandHandler botCommandHandler;
 
     public TgRemoteService(@Value("${telegram.bot.name}") String botName,
                            @Value("${telegram.bot.token}") String botToken,
-                           UserRepository userRepository,
-                           TgUI tgUI) {
+                           BotCommandHandler botCommandHandler) {
         this.botName = botName;
         this.botToken = botToken;
-        this.userRepository = userRepository;
-        this.tgUI = tgUI;
+        this.botCommandHandler = botCommandHandler;
     }
 
     @Override
@@ -62,59 +60,36 @@ public class TgRemoteService extends TelegramLongPollingBot {
         }
     }
 
-    InlineKeyboardButton createBtn(String name, String data) {
-        var inline = new InlineKeyboardButton();
-        inline.setText(name);
-        inline.setCallbackData(data);
-        return inline;
+    private void send(Content content) {
+        var message = new SendMessage();
+        message.setChatId(content.getChatId());
+        message.setText(content.getText());
+        message.setReplyMarkup(content.getMarkup());
+        send(message);
     }
 
-    public SendMessage sendButtons(long chatId) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText("Как настроение сегодня?");
-        message.setReplyMarkup(tgUI.buildButtons());
-        return message;
-    }
+//    InlineKeyboardButton createBtn(String name, String data) {
+//        var inline = new InlineKeyboardButton();
+//        inline.setText(name);
+//        inline.setCallbackData(data);
+//        return inline;
+//    }
+
+//    public SendMessage sendButtons(long chatId) {
+//        SendMessage message = new SendMessage();
+//        message.setChatId(chatId);
+//        message.setText("Как настроение сегодня?");
+//        message.setReplyMarkup(tgUI.buildButtons());
+//        return message;
+//    }
 
     @Override
     public void onUpdateReceived(Update update) {
-//        if (update.hasMessage() && update.getMessage().hasText()) {
-//            String messageText = update.getMessage().getText();
-//            long chatId = update.getMessage().getChatId();
-//            SendMessage message = new SendMessage();
-//            message.setChatId(chatId);
-//            message.setText("Вы написали: " + messageText);
-//            try {
-//                execute(message);
-//            } catch (TelegramApiException e) {
-//                e.printStackTrace();
-//            }
-//        }
-
-//        if (update.hasCallbackQuery()) {
-//            var data = update.getCallbackQuery().getData();
-//            var chatId = update.getCallbackQuery().getMessage().getChatId();
-//            send(new SendMessage(String.valueOf(chatId), MOOD_RESP.get(data)));
-//        }
-//        if (update.hasMessage() && update.getMessage().hasText()) {
-//            long chatId = update.getMessage().getChatId();
-//            send(sendButtons(chatId));
-//        }
-
         if (update.hasMessage() && update.getMessage().hasText()) {
-            var message = update.getMessage();
-            if ("/start".equals(message.getText())) {
-                long chatId = message.getChatId();
-                long clientId = message.getFrom().getId();
-                if (userRepository.findByClientId(clientId) == null) {
-                    var user = new User();
-                    user.setClientId(clientId);
-                    user.setChatId(chatId);
-                    userRepository.save(user);
-                }
-                send(sendButtons(chatId));  // Метод для отправки кнопок пользователю
-            }
+            botCommandHandler.commands(update.getMessage()).ifPresent(this::send);
+        }
+        if (update.hasCallbackQuery()) {
+            botCommandHandler.handleCallback(update.getCallbackQuery()).ifPresent(this::send);
         }
    }
 }
