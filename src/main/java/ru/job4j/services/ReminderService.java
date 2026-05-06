@@ -7,51 +7,43 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import ru.job4j.content.Content;
+import ru.job4j.content.SentContent;
+import ru.job4j.repository.MoodLogRepository;
 import ru.job4j.repository.UserRepository;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 @Service
-public class ReminderService implements ApplicationContextAware {
+public class ReminderService {
+    private final SentContent sentContent;
+    private final MoodLogRepository moodLogRepository;
+    private final TgUI tgUI;
 
-    private final TgRemoteService tgRemoteService;
-    private final UserRepository userRepository;
-    private ApplicationContext applicationContext;
-
-    public ReminderService(TgRemoteService tgRemoteService, UserRepository userRepository) {
-        this.tgRemoteService = tgRemoteService;
-        this.userRepository = userRepository;
+    public ReminderService(SentContent sentContent,
+                           MoodLogRepository moodLogRepository, TgUI tgUI) {
+        this.sentContent = sentContent;
+        this.moodLogRepository = moodLogRepository;
+        this.tgUI = tgUI;
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-        System.out.println("ApplicationContext set in ApplicationContextAwareExample");
-    }
-
-    public void displayAllBeanNames() {
-        String[] beanNames = applicationContext.getBeanDefinitionNames();
-        System.out.println("Beans in ApplicationContext:");
-        for (String beanName : beanNames) {
-            System.out.println(beanName);
-        }
-    }
-
-    @PostConstruct
-    public void init() {
-        System.out.println("Bean is going through @PostConstruct init.");
-    }
-
-    @PreDestroy
-    public void destroy() {
-        System.out.println("Bean will be destroyed via @PreDestroy.");
-    }
-
-    @Scheduled(fixedRateString = "${remind.period}")
-    public void ping() {
-        for (var user : userRepository.findAll()) {
-            var message = new SendMessage();
-            message.setChatId(user.getChatId());
-            message.setText("Ping");
-            tgRemoteService.send(message);
+    @Scheduled(fixedRateString = "${recommendation.alert.period}")
+    public void remindUsers() {
+        var startOfDay = LocalDate.now()
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
+        var endOfDay = LocalDate.now()
+                .plusDays(1)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli() - 1;
+        for (var user : moodLogRepository.findUsersWhoDidNotVoteToday(startOfDay, endOfDay)) {
+            var content = new Content(user.getChatId());
+            content.setText("Как настроение?");
+            content.setMarkup(tgUI.buildButtons());
+            sentContent.sent(content);
         }
     }
 }
