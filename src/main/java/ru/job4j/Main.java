@@ -26,10 +26,10 @@ public class Main {
     }
 
     @Bean
-    CommandLineRunner registerTelegramBot(TgRemoteService tgRemoteService) {
+    CommandLineRunner registerTelegramBot(TelegramBotService telegramBotService) {
         return args -> {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-            telegramBotsApi.registerBot(tgRemoteService);
+            telegramBotsApi.registerBot(telegramBotService);
         };
     }
 
