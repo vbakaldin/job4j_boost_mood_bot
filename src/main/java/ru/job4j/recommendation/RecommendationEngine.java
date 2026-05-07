@@ -7,10 +7,10 @@ import java.util.Random;
 
 @Service
 public class RecommendationEngine {
-    private final List<ContentProvider> contents;
+    private final List<ru.job4j.content.ContentProvider> contents;
     private static final Random RND = new Random(System.currentTimeMillis());
 
-    public RecommendationEngine(List<ContentProvider> contents) {
+    public RecommendationEngine(List<ru.job4j.content.ContentProvider> contents) {
         this.contents = contents;
     }
 

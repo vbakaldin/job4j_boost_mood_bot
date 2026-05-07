@@ -29,9 +29,30 @@ public interface MoodLogRepository extends CrudRepository<MoodLog, Long> {
 
     Stream<MoodLog> findByUserIdOrderByCreatedAtDesc(Long userId);
 
+    @Query("""
+    select distinct log.user
+    from MoodLog log
+    where log.user not in (
+        select todayLog.user
+        from MoodLog todayLog
+        where todayLog.createdAt between :from and :to
+    )
+    """)
     List<User> findUsersWhoDidNotVoteToday(long from, long to);
 
+    @Query("""
+        from MoodLog log
+        where log.user.id = :userId
+        and log.createdAt >= :weekStart
+        order by log.createdAt desc
+        """)
     List<MoodLog> findMoodLogsForWeek(Long userId, long weekStart);
 
+    @Query("""
+        from MoodLog log
+        where log.user.id = :userId
+        and log.createdAt >= :monthStart
+        order by log.createdAt desc
+        """)
     List<MoodLog> findMoodLogsForMonth(Long userId, long monthStart);
 }

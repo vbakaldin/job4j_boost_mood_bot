@@ -33,12 +33,12 @@ public class ReminderService {
         var startOfDay = LocalDate.now()
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant()
-                .toEpochMilli();
+                .getEpochSecond();
         var endOfDay = LocalDate.now()
                 .plusDays(1)
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant()
-                .toEpochMilli() - 1;
+                .getEpochSecond() - 1;
         for (var user : moodLogRepository.findUsersWhoDidNotVoteToday(startOfDay, endOfDay)) {
             var content = new Content(user.getChatId());
             content.setText("Как настроение?");

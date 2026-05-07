@@ -42,8 +42,11 @@ public class BotCommandHandler implements ApplicationContextAware {
 
     Optional<Content> handleCallback(CallbackQuery callback) {
         var moodId = Long.valueOf(callback.getData());
-        var user = userRepository.findById(callback.getFrom().getId());
-        return user.map(value -> moodService.chooseMood(value, moodId));
+        var user = userRepository.findByClientId(callback.getFrom().getId());
+        if (user == null) {
+            return Optional.empty();
+        }
+        return Optional.of(moodService.chooseMood(user, moodId));
     }
 
     private Optional<Content> handleStartCommand(long chatId, Long clientId) {
