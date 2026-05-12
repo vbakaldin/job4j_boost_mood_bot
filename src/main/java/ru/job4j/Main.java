@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import ru.job4j.config.*;
@@ -26,6 +27,7 @@ public class Main {
     }
 
     @Bean
+    @org.springframework.context.annotation.Conditional(RealTelegramCondition.class)
     CommandLineRunner registerTelegramBot(TelegramBotService telegramBotService) {
         return args -> {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
@@ -34,6 +36,7 @@ public class Main {
     }
 
     @Bean
+    @Conditional(RealTelegramCondition.class)
     CommandLineRunner loadDatabase(MoodRepository moodRepository,
                                    MoodContentRepository moodContentRepository,
                                    AwardRepository awardRepository) {

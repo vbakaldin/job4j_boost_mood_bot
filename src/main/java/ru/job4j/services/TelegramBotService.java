@@ -3,6 +3,7 @@ package ru.job4j.services;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.job4j.content.Content;
 import ru.job4j.content.SentContent;
 import ru.job4j.content.SentContentException;
+import ru.job4j.config.RealTelegramCondition;
 
 @Service
+@Conditional(RealTelegramCondition.class)
 public class TelegramBotService extends TelegramLongPollingBot implements SentContent {
     private final BotCommandHandler handler;
     private final String botName;
