@@ -16,6 +16,10 @@ public class User {
     @Column(name = "chat_id")
     private long chatId;
 
+    private Boolean dailyAdviceEnabled = true;
+
+    private Long lastDailyAdviceDay;
+
     public Long getId() {
         return id;
     }
@@ -34,6 +38,22 @@ public class User {
 
     public long getChatId() {
         return chatId;
+    }
+
+    public Boolean getDailyAdviceEnabled() {
+        return dailyAdviceEnabled;
+    }
+
+    public void setDailyAdviceEnabled(Boolean dailyAdviceEnabled) {
+        this.dailyAdviceEnabled = dailyAdviceEnabled;
+    }
+
+    public Long getLastDailyAdviceDay() {
+        return lastDailyAdviceDay;
+    }
+
+    public void setLastDailyAdviceDay(Long lastDailyAdviceDay) {
+        this.lastDailyAdviceDay = lastDailyAdviceDay;
     }
 
     public void setChatId(long chatId) {

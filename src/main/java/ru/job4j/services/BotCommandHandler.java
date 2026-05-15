@@ -18,13 +18,16 @@ public class BotCommandHandler implements ApplicationContextAware {
     private final UserRepository userRepository;
     private final MoodService moodService;
     private final TgUI tgUI;
+    private final DailyAdviceService dailyAdviceService;
 
     public BotCommandHandler(UserRepository userRepository,
                              MoodService moodService,
-                             TgUI tgUI) {
+                             TgUI tgUI,
+                             DailyAdviceService dailyAdviceService) {
         this.userRepository = userRepository;
         this.moodService = moodService;
         this.tgUI = tgUI;
+        this.dailyAdviceService = dailyAdviceService;
     }
 
     Optional<Content> commands(Message message) {
@@ -36,6 +39,9 @@ public class BotCommandHandler implements ApplicationContextAware {
             case "/week_mood_log" -> moodService.weekMoodLogCommand(chatId, clientId);
             case "/month_mood_log" -> moodService.monthMoodLogCommand(chatId, clientId);
             case "/award" -> moodService.awards(chatId, clientId);
+            case "/daily_advice" -> dailyAdviceService.dailyAdvice(chatId, clientId);
+            case "/daily_advice_on" -> dailyAdviceService.enableDailyAdvice(chatId, clientId);
+            case "/daily_advice_off" -> dailyAdviceService.disableDailyAdvice(chatId, clientId);
             default -> Optional.empty();
         };
     }

@@ -31,10 +31,11 @@ public class MoodLogFakeRepository
     }
 
     @Override
-    public Stream<MoodLog> findByUserIdOrderByCreatedAtDesc(Long userId) {
+    public List<MoodLog> findByUserIdOrderByCreatedAtDesc(Long userId) {
         return memory.values().stream()
                 .filter(moodLog -> moodLog.getUser().getId().equals(userId))
-                .sorted(Comparator.comparing(MoodLog::getCreatedAt).reversed());
+                .sorted(Comparator.comparing(MoodLog::getCreatedAt).reversed())
+                .collect(Collectors.toList());
     }
 
     @Override

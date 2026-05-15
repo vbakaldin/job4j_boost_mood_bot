@@ -27,7 +27,7 @@ public interface MoodLogRepository extends CrudRepository<MoodLog, Long> {
 
     List<MoodLog> findByUserId(Long userId);
 
-    Stream<MoodLog> findByUserIdOrderByCreatedAtDesc(Long userId);
+    List<MoodLog> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     @Query("""
     select distinct log.user

@@ -37,6 +37,7 @@ public class AchievementService implements ApplicationListener<UserEvent> {
     public void onApplicationEvent(UserEvent event) {
         var user = event.getUser();
         var goodMoodDays = moodLogRepository.findByUserIdOrderByCreatedAtDesc(user.getId())
+                .stream()
                 .map(MoodLog::getMood)
                 .filter(mood -> mood != null && mood.isGood())
                 .count();
